@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Utah Cities</title>
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    </head>
+    <body>
+        <form>Enter A Utah City:
+            <input type="text" id="cityfield"><br>
+            Suggestion: <span id="hint">Empty</span><br>
+            <input id="button" type="submit" value="Submit">
+        </form>
+        <p>City</p>
+        <h1 id="dispcity">No City</h1>
+        <p>Current Weather</p>
+        <div id="weather">No weather</div>
+
+        <script>
+            $("#cityfield").keyup(function() {
+                var typed = $("#cityfield").val();
+                $.getJSON("http://udkkd0076000.djoshua.koding.io:8008/getcity?q=" + typed,
+                  function(data) {
+                    var everything = "<ul>";
+                    $.each(data, function (i, item) {
+                      everything += "<li> " + data[i].city;
+                    });
+                    everything += "</ul>";
+                    $("#hint").html(everything);
+                  })
+                  .done(function () {
+                    console.log("getJson success");
+                  })
+                  .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.log("getJson fail " + textStatus);
+                    console.log("incoming " + jqXHR.responseText);
+                  })
+                  .always(function () {
+                    console.log("all ended");
+                  })
+                  .complete(function () {
+                    console.log("complete");
+                  });
+            });
+
+            $("#button").click(function (e) {
+              var value = $("#cityfield").val();
+              e.preventDefault();
+              $("#dispcity").text(value);
+              var url = "http://api.wunderground.com/api/fc69e8e51d87ae7d/conditions/q/UT/" + value + ".json";
+              $.ajax({
+                url : url,
+                dataType : "jsonp",
+                success : function (data) {
+                  var location = value;
+                  var temperature = data['current_observation']['temperature_string'];
+                  var weather = data['current_observation']['weather'];
+                  var everything = "<ul>";
+                  everything += "<li>Location: " + location + "</li>";
+                  everything += "<li>Temperature: " + temperature + "</li>";
+                  everything += "<li>Weather: " + weather + "</li>";
+                  everything += "</ul>";
+                  $("#weather").html(everything);
+                }
+              });
+            });
+        </script>
+    </body>
+</html>
